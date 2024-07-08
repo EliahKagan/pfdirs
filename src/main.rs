@@ -4,12 +4,14 @@
 use std::string::FromUtf16Error;
 
 use windows::{
-    core::{Error, GUID, PWSTR},
+    core::{Error, GUID, PCWSTR, PWSTR},
     Win32::{
+        Foundation::MAX_PATH,
         System::Com::CoTaskMemFree,
         UI::Shell::{
             FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64, FOLDERID_ProgramFilesX86,
-            FOLDERID_UserProgramFiles, SHGetKnownFolderPath, KF_FLAG_DEFAULT,
+            FOLDERID_UserProgramFiles, SHGetFolderPathW, SHGetKnownFolderPath, CSIDL_PROGRAM_FILES,
+            CSIDL_PROGRAM_FILESX86, KF_FLAG_DEFAULT, SHGFP_TYPE_CURRENT,
         },
     },
 };
@@ -73,12 +75,12 @@ fn try_get_known_folder_path(id: GUID) -> Result<String, Error> {
 }
 
 fn report_known_folders() -> Result<(), Error> {
-    // TODO: Avoid hard-coding the name strings, unless that forces us to initialize COM.
+    // TODO: If we don't have to initialize COM to get the names, do that too (3 columns).
     let folders = [
-        ("ProgramFiles", FOLDERID_ProgramFiles),
-        ("ProgramFilesX64", FOLDERID_ProgramFilesX64),
-        ("ProgramFilesX86", FOLDERID_ProgramFilesX86),
-        ("UserProgramFiles", FOLDERID_UserProgramFiles),
+        ("FOLDERID_ProgramFiles", FOLDERID_ProgramFiles),
+        ("FOLDERID_ProgramFilesX64", FOLDERID_ProgramFilesX64),
+        ("FOLDERID_ProgramFilesX86", FOLDERID_ProgramFilesX86),
+        ("FOLDERID_UserProgramFiles", FOLDERID_UserProgramFiles),
     ];
 
     let width = column_width(folders.map(|(name, _)| name));
@@ -86,10 +88,48 @@ fn report_known_folders() -> Result<(), Error> {
     println!("Relevant known folders:");
     println!();
 
-    for (name, id) in folders {
+    for (symbol, id) in folders {
         let path_item =
             try_get_known_folder_path(id).unwrap_or_else(|e| format!("[{}]", e.message()));
-        println!("  {name:<width$}  {path_item}");
+        println!("  {symbol:<width$}  {path_item}");
+    }
+
+    Ok(())
+}
+
+fn try_get_path_from_csidl(csidl: u32) -> Result<String, Error> {
+    let mut buffer = [0u16; MAX_PATH as usize];
+
+    let path = unsafe {
+        SHGetFolderPathW(
+            None,
+            csidl as i32,
+            None,
+            SHGFP_TYPE_CURRENT.0 as u32,
+            &mut buffer,
+        )?;
+
+        PCWSTR::from_raw(buffer.as_ptr()).to_string()?
+    };
+
+    Ok(path)
+}
+
+fn report_csidl() -> Result<(), Error> {
+    let folders = [
+        ("CSIDL_PROGRAM_FILES", CSIDL_PROGRAM_FILES), // FOLDERID_ProgramFiles
+        ("CSIDL_PROGRAM_FILESX86", CSIDL_PROGRAM_FILESX86), // FOLDERID_ProgramFilesX86
+    ];
+
+    let width = column_width(folders.map(|(name, _)| name));
+
+    println!("Relevant CSIDLs:");
+    println!();
+
+    for (symbol, id) in folders {
+        let path_item =
+            try_get_path_from_csidl(id).unwrap_or_else(|e| format!("[{}]", e.message()));
+        println!("  {symbol:<width$}  {path_item}");
     }
 
     Ok(())
@@ -99,8 +139,10 @@ fn main() -> Result<(), Error> {
     report_environment_variables();
     println!();
     report_known_folders()?;
+    println!();
+    report_csidl()?;
 
-    // FIXME: Do the other reports.
+    // FIXME: Do the other reports, at least the registry.
 
     Ok(())
 }
