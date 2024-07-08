@@ -17,7 +17,7 @@ use windows::{
 };
 
 macro_rules! with_names {
-    ($($ident:ident),*) => {
+    ($($ident:ident),* $(,)?) => {
         [$(
             (stringify!($ident), $ident),
         )*]
@@ -88,7 +88,7 @@ fn report_known_folders() -> Result<(), Error> {
         FOLDERID_ProgramFiles,
         FOLDERID_ProgramFilesX64,
         FOLDERID_ProgramFilesX86,
-        FOLDERID_UserProgramFiles
+        FOLDERID_UserProgramFiles,
     );
 
     let width = column_width(folders.map(|(name, _)| name));
@@ -126,7 +126,7 @@ fn try_get_path_from_csidl(csidl: u32) -> Result<String, Error> {
 fn report_csidl() -> Result<(), Error> {
     let folders = with_names!(
         CSIDL_PROGRAM_FILES, // FOLDERID_ProgramFiles
-        CSIDL_PROGRAM_FILESX86 // FOLDERID_ProgramFilesX86
+        CSIDL_PROGRAM_FILESX86, // FOLDERID_ProgramFilesX86
     );
 
     let width = column_width(folders.map(|(name, _)| name));
