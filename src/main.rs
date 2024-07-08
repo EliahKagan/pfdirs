@@ -5,10 +5,12 @@ use std::string::FromUtf16Error;
 
 use windows::{
     core::{Error, GUID, PWSTR},
-    Win32::System::Com::CoTaskMemFree,
-    Win32::UI::Shell::{
-        FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64, FOLDERID_ProgramFilesX86,
-        FOLDERID_UserProgramFiles, SHGetKnownFolderPath, KF_FLAG_DEFAULT,
+    Win32::{
+        System::Com::CoTaskMemFree,
+        UI::Shell::{
+            FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64, FOLDERID_ProgramFilesX86,
+            FOLDERID_UserProgramFiles, SHGetKnownFolderPath, KF_FLAG_DEFAULT,
+        },
     },
 };
 
