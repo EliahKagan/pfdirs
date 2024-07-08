@@ -16,6 +16,14 @@ use windows::{
     },
 };
 
+macro_rules! with_names {
+    ($($ident:ident),*) => {
+        [$(
+            (stringify!($ident), $ident),
+        )*]
+    };
+}
+
 fn column_width<'a, I>(names: I) -> usize
 where
     I: IntoIterator<Item = &'a str>,
@@ -76,12 +84,12 @@ fn try_get_known_folder_path(id: GUID) -> Result<String, Error> {
 
 fn report_known_folders() -> Result<(), Error> {
     // TODO: If we don't have to initialize COM to get the names, do that too (3 columns).
-    let folders = [
-        ("FOLDERID_ProgramFiles", FOLDERID_ProgramFiles),
-        ("FOLDERID_ProgramFilesX64", FOLDERID_ProgramFilesX64),
-        ("FOLDERID_ProgramFilesX86", FOLDERID_ProgramFilesX86),
-        ("FOLDERID_UserProgramFiles", FOLDERID_UserProgramFiles),
-    ];
+    let folders = with_names!(
+        FOLDERID_ProgramFiles,
+        FOLDERID_ProgramFilesX64,
+        FOLDERID_ProgramFilesX86,
+        FOLDERID_UserProgramFiles
+    );
 
     let width = column_width(folders.map(|(name, _)| name));
 
@@ -116,10 +124,10 @@ fn try_get_path_from_csidl(csidl: u32) -> Result<String, Error> {
 }
 
 fn report_csidl() -> Result<(), Error> {
-    let folders = [
-        ("CSIDL_PROGRAM_FILES", CSIDL_PROGRAM_FILES), // FOLDERID_ProgramFiles
-        ("CSIDL_PROGRAM_FILESX86", CSIDL_PROGRAM_FILESX86), // FOLDERID_ProgramFilesX86
-    ];
+    let folders = with_names!(
+        CSIDL_PROGRAM_FILES, // FOLDERID_ProgramFiles
+        CSIDL_PROGRAM_FILESX86 // FOLDERID_ProgramFilesX86
+    );
 
     let width = column_width(folders.map(|(name, _)| name));
 
