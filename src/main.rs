@@ -83,7 +83,7 @@ fn try_get_known_folder_path(id: GUID) -> Result<String, Error> {
 }
 
 fn report_known_folders() -> Result<(), Error> {
-    // TODO: If we don't have to initialize COM to get the names, do that too (3 columns).
+    // TODO: If we can get the names without initializing COM, do so and display them as well.
     let folders = with_names!(
         FOLDERID_ProgramFiles,
         FOLDERID_ProgramFilesX64,
