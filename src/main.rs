@@ -2,6 +2,8 @@
 //! are located on a Windows system.
 
 use std::{io, string::FromUtf16Error};
+
+use known_folders::{get_known_folder_path, KnownFolder};
 use windows::{
     core::{Error, GUID, PCWSTR, PWSTR},
     Win32::{
@@ -15,14 +17,6 @@ use windows::{
     },
 };
 use winreg::{enums::*, RegKey};
-
-macro_rules! with_names {
-    ($($ident:ident),* $(,)?) => {
-        [$(
-            (stringify!($ident), $ident),
-        )*]
-    };
-}
 
 fn column_width<'a, I>(names: I) -> usize
 where
@@ -42,7 +36,6 @@ fn report_environment_variables() {
         "ProgramFiles(x86)",
         "ProgramW6432",
     ];
-
     let width = column_width(names);
 
     println!("Relevant environment variables:");
@@ -76,30 +69,66 @@ impl Drop for CoStr {
     }
 }
 
-// FIXME: Figure out if we should also check with other flags than KF_FLAG_DEFAULT.
-fn try_get_known_folder_path(id: GUID) -> Result<String, Error> {
+// TODO: Figure out if we should also check with other flags than KF_FLAG_DEFAULT.
+fn get_known_folder_path_or_detailed_error(id: GUID) -> Result<String, Error> {
     match unsafe { SHGetKnownFolderPath(&id, KF_FLAG_DEFAULT, None) } {
         Ok(pwstr) => Ok(CoStr::new(pwstr).to_string()?),
         Err(e) => Err(e),
     }
 }
 
+/// Obtain information about known folders using both the `known-folders` crate and by manually
+/// using the Windows API via the `windows` crate, and compare the results. Doing both is for
+/// experimentation and demonstration purposes and not a reasonable production technique.
+/// Generally at most one of these two approaches should be used, depending on requirements.
 fn report_known_folders() -> Result<(), Error> {
     // TODO: If we can get the names without initializing COM, do so and display them as well.
-    let folders = with_names!(
-        FOLDERID_ProgramFiles,
-        FOLDERID_ProgramFilesX64,
-        FOLDERID_ProgramFilesX86,
-        FOLDERID_UserProgramFiles,
-    );
-
-    let width = column_width(folders.map(|(name, _)| name));
+    let folders = [
+        (
+            "FOLDERID_ProgramFiles",
+            FOLDERID_ProgramFiles,
+            KnownFolder::ProgramFiles,
+        ),
+        (
+            "FOLDERID_ProgramFilesX64",
+            FOLDERID_ProgramFilesX64,
+            KnownFolder::ProgramFilesX64,
+        ),
+        (
+            "FOLDERID_ProgramFilesX86",
+            FOLDERID_ProgramFilesX86,
+            KnownFolder::ProgramFilesX86,
+        ),
+        (
+            "FOLDERID_UserProgramFiles",
+            FOLDERID_UserProgramFiles,
+            KnownFolder::UserProgramFiles,
+        ),
+    ];
+    let width = column_width(folders.map(|(name, _, _)| name));
 
     println!("Relevant known folders:");
     println!();
 
-    for (symbol, id) in folders {
-        let path_item = try_get_known_folder_path(id).unwrap_or_else(|e| format!("[{e}]"));
+    for (symbol, id, kf) in folders {
+        // Calling SHGetKnownFolderPath ourselves give more detailed error information.
+        let path_or_error = get_known_folder_path_or_detailed_error(id);
+
+        // The `known-folders` crate code is simple and easy, but gives `Option`, not `Result`.
+        let maybe_path = get_known_folder_path(kf)
+            .map(|p| p.to_str().map(String::from))
+            .flatten();
+
+        // Compare the results. If inconsistent, panic with the details.
+        let path_item = match (path_or_error, maybe_path) {
+            (Ok(my_kf_path), Some(lib_kf_path)) if my_kf_path == lib_kf_path => my_kf_path,
+            (Err(e), None) => format!("[{e}]"),
+            (our_thing, lib_thing) => {
+                panic!("Mismatch! We got {our_thing:?}, known_folders library got {lib_thing:?}")
+            }
+        };
+
+        // Report the path obtained, or detailed error info from our own SHGetKnownFolderPath call.
         println!("  {symbol:<width$}  {path_item}");
     }
 
@@ -126,11 +155,10 @@ fn try_get_path_from_csidl(csidl: u32) -> Result<String, Error> {
 }
 
 fn report_csidl() -> Result<(), Error> {
-    let folders = with_names!(
-        CSIDL_PROGRAM_FILES,    // Corresponds to: FOLDERID_ProgramFiles
-        CSIDL_PROGRAM_FILESX86, // Corresponds to: FOLDERID_ProgramFilesX86
-    );
-
+    let folders = [
+        ("CSIDL_PROGRAM_FILES", CSIDL_PROGRAM_FILES), // Corresponds to: FOLDERID_ProgramFiles
+        ("CSIDL_PROGRAM_FILESX86", CSIDL_PROGRAM_FILESX86), // Corresponds to: FOLDERID_ProgramFilesX86
+    ];
     let width = column_width(folders.map(|(name, _)| name));
 
     println!("Relevant CSIDLs:");
@@ -153,7 +181,6 @@ fn report_registry_view(caption: &str, flag_for_view: u32) -> Result<(), io::Err
         // "ProgramFilesPath", // Less interesting, should be the literal string: %ProgramFiles%
         "ProgramW6432Dir",
     ];
-
     let width = column_width(key_names);
 
     let cur_ver = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey_with_flags(
