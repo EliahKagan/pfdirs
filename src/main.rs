@@ -14,10 +14,7 @@ use windows::{
         },
     },
 };
-use windows_sys::Win32::System::Registry::{
-    KEY_QUERY_VALUE, KEY_WOW64_32KEY, KEY_WOW64_64KEY, REG_SAM_FLAGS,
-};
-use winreg::{enums::HKEY_LOCAL_MACHINE, RegKey};
+use winreg::{enums::*, RegKey};
 
 macro_rules! with_names {
     ($($ident:ident),* $(,)?) => {
@@ -148,7 +145,7 @@ fn report_csidl() -> Result<(), Error> {
     Ok(())
 }
 
-fn report_registry_view(caption: &str, flag_for_view: REG_SAM_FLAGS) -> Result<(), io::Error> {
+fn report_registry_view(caption: &str, flag_for_view: u32) -> Result<(), io::Error> {
     let key_names = [
         "ProgramFilesDir",
         "ProgramFilesDir (Arm)",

@@ -13,7 +13,6 @@ name = "pfdirs"
 version = "0.1.0"
 dependencies = [
  "windows",
- "windows-sys",
  "winreg",
 ]
 
