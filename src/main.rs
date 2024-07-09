@@ -208,7 +208,7 @@ fn report_all_registry_views() -> Result<(), io::Error> {
     let views = [
         ("default view", 0),
         ("KEY_WOW64_32KEY", KEY_WOW64_32KEY),
-        ("KEY_WOW64_32KEY", KEY_WOW64_64KEY),
+        ("KEY_WOW64_64KEY", KEY_WOW64_64KEY),
     ];
 
     for (caption, flag_for_view) in views {
