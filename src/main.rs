@@ -1,8 +1,7 @@
-//! Reports information from multiple sources about where `Program Files`
-//! folders are located on a Windows system.
+//! Reports information from multiple sources about where Program Files folders
+//! are located on a Windows system.
 
-use std::string::FromUtf16Error;
-
+use std::{io, string::FromUtf16Error};
 use windows::{
     core::{Error, GUID, PCWSTR, PWSTR},
     Win32::{
@@ -15,6 +14,10 @@ use windows::{
         },
     },
 };
+use windows_sys::Win32::System::Registry::{
+    KEY_QUERY_VALUE, KEY_WOW64_32KEY, KEY_WOW64_64KEY, REG_SAM_FLAGS,
+};
+use winreg::{enums::HKEY_LOCAL_MACHINE, RegKey};
 
 macro_rules! with_names {
     ($($ident:ident),* $(,)?) => {
@@ -52,6 +55,8 @@ fn report_environment_variables() {
         let path_item = std::env::var(name).unwrap_or_else(|_| "[variable does not exist]".into());
         println!("  {name:<width$}  {path_item}");
     }
+
+    println!();
 }
 
 struct CoStr {
@@ -102,6 +107,7 @@ fn report_known_folders() -> Result<(), Error> {
         println!("  {symbol:<width$}  {path_item}");
     }
 
+    println!();
     Ok(())
 }
 
@@ -140,17 +146,58 @@ fn report_csidl() -> Result<(), Error> {
         println!("  {symbol:<width$}  {path_item}");
     }
 
+    println!();
+    Ok(())
+}
+
+fn report_registry_view(caption: &str, flag_for_view: REG_SAM_FLAGS) -> Result<(), io::Error> {
+    let key_names = [
+        "ProgramFilesDir",
+        "ProgramFilesDir (Arm)",
+        "ProgramFilesDir (x86)",
+        // "ProgramFilesPath", // Less interesting, should be the literal string: %ProgramFiles%
+        "ProgramW6432Dir",
+    ];
+
+    let width = column_width(key_names);
+
+    let cur_ver = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey_with_flags(
+        r#"SOFTWARE\Microsoft\Windows\CurrentVersion"#,
+        KEY_QUERY_VALUE | flag_for_view,
+    )?;
+
+    println!("Relevant registry keys - with {caption}:");
+    println!();
+
+    for key_name in key_names {
+        let path_item = cur_ver
+            .get_value(key_name)
+            .unwrap_or_else(|e| format!("[{e}]"));
+        println!("  {key_name:<width$}  {path_item}");
+    }
+
+    println!();
+    Ok(())
+}
+
+fn report_all_registry_views() -> Result<(), io::Error> {
+    let views = [
+        ("default view", 0),
+        ("KEY_WOW64_32KEY", KEY_WOW64_32KEY),
+        ("KEY_WOW64_32KEY", KEY_WOW64_64KEY),
+    ];
+
+    for (caption, flag_for_view) in views {
+        report_registry_view(caption, flag_for_view)?;
+    }
+
     Ok(())
 }
 
 fn main() -> Result<(), Error> {
     report_environment_variables();
-    println!();
     report_known_folders()?;
-    println!();
     report_csidl()?;
-
-    // FIXME: Do the other reports, at least the registry.
-
+    report_all_registry_views()?;
     Ok(())
 }
