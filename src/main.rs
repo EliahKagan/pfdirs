@@ -114,13 +114,13 @@ fn report_known_folders() -> Result<(), Error> {
     println!();
 
     for (symbol, id, kf) in folders {
-        // Calling SHGetKnownFolderPath ourselves give more detailed error information.
+        // Calling SHGetKnownFolderPath ourselves gives more detailed error information.
         let path_or_error = get_known_folder_path_or_detailed_error(id);
 
         // The `known-folders` crate code is simple and easy, but gives `Option`, not `Result`.
         let maybe_path = get_known_folder_path(kf).and_then(|p| p.to_str().map(String::from));
 
-        // Compare the results. If inconsistent, panic with the details.
+        // Compare the information from both approaches. If inconsistent, panic with the details.
         let path_item = match (path_or_error, maybe_path) {
             (Ok(my_kf_path), Some(lib_kf_path)) if my_kf_path == lib_kf_path => my_kf_path,
             (Err(e), None) => format!("[{e}]"),
