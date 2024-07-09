@@ -115,9 +115,7 @@ fn report_known_folders() -> Result<(), Error> {
         let path_or_error = get_known_folder_path_or_detailed_error(id);
 
         // The `known-folders` crate code is simple and easy, but gives `Option`, not `Result`.
-        let maybe_path = get_known_folder_path(kf)
-            .map(|p| p.to_str().map(String::from))
-            .flatten();
+        let maybe_path = get_known_folder_path(kf).and_then(|p| p.to_str().map(String::from));
 
         // Compare the results. If inconsistent, panic with the details.
         let path_item = match (path_or_error, maybe_path) {
