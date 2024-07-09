@@ -125,8 +125,8 @@ fn report_known_folders() -> Result<(), Error> {
         let path_item = match (path_or_error, maybe_path) {
             (Ok(my_kf_path), Some(lib_kf_path)) if my_kf_path == lib_kf_path => my_kf_path,
             (Err(e), None) => format!("[{e}]"),
-            (our_thing, lib_thing) => {
-                panic!("Mismatch! We got {our_thing:?}, known_folders library got {lib_thing:?}")
+            (my_thing, lib_thing) => {
+                panic!("Mismatch! We got {my_thing:?}, known_folders library got {lib_thing:?}")
             }
         };
 
@@ -180,7 +180,7 @@ fn report_registry_view(caption: &str, flag_for_view: u32) -> Result<(), io::Err
         "ProgramFilesDir",
         "ProgramFilesDir (Arm)",
         "ProgramFilesDir (x86)",
-        // "ProgramFilesPath", // Less interesting, should be the literal string: %ProgramFiles%
+        // "ProgramFilesPath", // Less interesting, usually literal %ProgramFiles% if got this way.
         "ProgramW6432Dir",
     ];
     let width = column_width(key_names);
