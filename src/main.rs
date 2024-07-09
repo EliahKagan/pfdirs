@@ -66,6 +66,7 @@ impl CoStr {
     }
 }
 
+// TODO: Figure out whether to implement windows::core::Owned instead.
 impl Drop for CoStr {
     fn drop(&mut self) {
         unsafe { CoTaskMemFree(Some(self.pwstr.as_ptr() as *const _)) };
