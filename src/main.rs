@@ -16,7 +16,10 @@ use windows::{
         },
     },
 };
-use winreg::{enums::*, RegKey};
+use winreg::{
+    enums::{HKEY_LOCAL_MACHINE, KEY_QUERY_VALUE, KEY_WOW64_32KEY, KEY_WOW64_64KEY},
+    RegKey,
+};
 
 fn column_width<'a, I>(names: I) -> usize
 where
