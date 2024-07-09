@@ -52,7 +52,7 @@ fn report_environment_variables() {
     println!();
 
     for name in names {
-        let path_item = std::env::var(name).unwrap_or_else(|_| "[variable does not exist]".into());
+        let path_item = std::env::var(name).unwrap_or_else(|e| format!("[{e}]"));
         println!("  {name:<width$}  {path_item}");
     }
 
@@ -102,8 +102,7 @@ fn report_known_folders() -> Result<(), Error> {
     println!();
 
     for (symbol, id) in folders {
-        let path_item =
-            try_get_known_folder_path(id).unwrap_or_else(|e| format!("[{}]", e.message()));
+        let path_item = try_get_known_folder_path(id).unwrap_or_else(|e| format!("[{e}]"));
         println!("  {symbol:<width$}  {path_item}");
     }
 
@@ -141,8 +140,7 @@ fn report_csidl() -> Result<(), Error> {
     println!();
 
     for (symbol, id) in folders {
-        let path_item =
-            try_get_path_from_csidl(id).unwrap_or_else(|e| format!("[{}]", e.message()));
+        let path_item = try_get_path_from_csidl(id).unwrap_or_else(|e| format!("[{e}]"));
         println!("  {symbol:<width$}  {path_item}");
     }
 
