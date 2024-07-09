@@ -131,8 +131,8 @@ fn try_get_path_from_csidl(csidl: u32) -> Result<String, Error> {
 
 fn report_csidl() -> Result<(), Error> {
     let folders = with_names!(
-        CSIDL_PROGRAM_FILES,    // FOLDERID_ProgramFiles
-        CSIDL_PROGRAM_FILESX86, // FOLDERID_ProgramFilesX86
+        CSIDL_PROGRAM_FILES,    // Corresponds to: FOLDERID_ProgramFiles
+        CSIDL_PROGRAM_FILESX86, // Corresponds to: FOLDERID_ProgramFilesX86
     );
 
     let width = column_width(folders.map(|(name, _)| name));
