@@ -84,26 +84,22 @@
 //! no such directory.
 
 use core::ffi::c_void;
-use std::{io, string::FromUtf16Error};
+use std::io;
+use std::string::FromUtf16Error;
 
 use known_folders::{get_known_folder_path, KnownFolder};
-use windows::{
-    core::{Error, GUID, PCWSTR, PWSTR},
-    Win32::{
-        Foundation::MAX_PATH,
-        System::Com::CoTaskMemFree,
-        UI::Shell::{
-            FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64, FOLDERID_ProgramFilesX86,
-            FOLDERID_UserProgramFiles, SHGetFolderPathW, SHGetKnownFolderPath, CSIDL_PROGRAM_FILES,
-            CSIDL_PROGRAM_FILESX86, KF_FLAG_DEFAULT, SHGFP_TYPE_CURRENT,
-        },
-    },
+use windows::core::{Error, GUID, PCWSTR, PWSTR};
+use windows::Win32::Foundation::MAX_PATH;
+use windows::Win32::System::Com::CoTaskMemFree;
+use windows::Win32::UI::Shell::{
+    FOLDERID_ProgramFiles, FOLDERID_ProgramFilesX64, FOLDERID_ProgramFilesX86,
+    FOLDERID_UserProgramFiles, SHGetFolderPathW, SHGetKnownFolderPath, CSIDL_PROGRAM_FILES,
+    CSIDL_PROGRAM_FILESX86, KF_FLAG_DEFAULT, SHGFP_TYPE_CURRENT,
 };
 use winreg::{
     enums::{HKEY_LOCAL_MACHINE, KEY_QUERY_VALUE, KEY_WOW64_32KEY, KEY_WOW64_64KEY},
     RegKey,
 };
-
 
 /// Finds the width of the symbolic name column for the table of reported results.
 ///
