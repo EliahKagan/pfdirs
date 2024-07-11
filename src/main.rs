@@ -1,6 +1,7 @@
 //! Reports information from multiple sources about where Program Files folders
 //! are located on a Windows system.
 
+use core::ffi::c_void;
 use std::{io, string::FromUtf16Error};
 
 use known_folders::{get_known_folder_path, KnownFolder};
@@ -69,7 +70,7 @@ impl CoStr {
 // TODO: Figure out whether to implement windows::core::Owned instead.
 impl Drop for CoStr {
     fn drop(&mut self) {
-        unsafe { CoTaskMemFree(Some(self.pwstr.as_ptr() as *const _)) };
+        unsafe { CoTaskMemFree(Some(self.pwstr.as_ptr().cast::<c_void>())) };
     }
 }
 
