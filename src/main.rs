@@ -249,7 +249,7 @@ fn report_known_folders() -> Result<(), Error> {
         // Calling SHGetKnownFolderPath ourselves gives more detailed error information.
         let path_or_error = get_known_folder_path_or_detailed_error(id);
 
-        // The `known-folders` crate code is simple and easy, but gives `Option`, not `Result`.
+        // The `known-folders` crate is simple and easy to use, but gives `Option`, not `Result`.
         let maybe_path = get_known_folder_path(kf).and_then(|p| p.to_str().map(String::from));
 
         // Compare the information from both approaches. If inconsistent, panic with the details.
