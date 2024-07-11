@@ -102,9 +102,6 @@ use winreg::{
 };
 
 /// Finds the width of the symbolic name column for the table of reported results.
-///
-/// This estimate is highly likely to be accurate, since the names in this column are known in
-/// advance. (They even happen to be all ASCII characters, though this does not rely on that.)
 fn column_width<'a, I>(names: I) -> usize
 where
     I: IntoIterator<Item = &'a str>,
