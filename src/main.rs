@@ -64,9 +64,9 @@
 //!
 //! However, not all of them are always available to all processes on all Windows systems.
 //!
-//! As detailed in comments below on specific `report_*` functions below, Microsoft documentation
-//! tends to recommend obtaining such paths through the *known folders* facilities. However, as
-//! shown above, even on a 64-bit system, a 32-bit process unfortunately does not see any
+//! As detailed in comments on specific `report_*` functions below, Microsoft documentation tends
+//! to recommend obtaining such paths through the *known folders* facilities. However, as shown
+//! above, even on a 64-bit system, a 32-bit process unfortunately does not see any
 //! `FOLDERID_ProgramFilesX64` known folder (and there is no CSIDL corresponding to that).
 //!
 //! On such a system it may therefore be necessary to use either the `ProgramW6432` environment
