@@ -178,22 +178,19 @@ fn get_known_folder_path_or_detailed_error(id: GUID) -> Result<String, Error> {
 ///
 /// Windows provides two approaches in its API for accessing the paths of known folders:
 ///
-/// - The
-///   [`SHGetKnownFolderPath`](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath)
-///   function. This approach is more straightforward and typically sufficient when the GUIDs are
-///   known and only paths are needed. (There are a small number of other related functions for
-///   obtaining other information.) This is the approach used here.
+/// - The [`SHGetKnownFolderPath`][shgkfp] function. This approach is more straightforward and
+///   typically sufficient when the GUIDs are known and only paths are needed. (There are a small
+///   number of other related functions for obtaining other information.) This is the approach used
+///   here.
 ///
-/// - The
-///   [`IKnownFolder::GetPath`](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-iknownfolder-getpath)
-///   method. This is more involved, but `IKnownFolder` COM objects are a richer source of
-///   information. For example, `IKnownFolder` supports iterating over all known folders.
+/// - The [`IKnownFolder::GetPath`][ikf-gp] method. This is more involved, but `IKnownFolder` COM
+///   objects are a richer source of information. For example, `IKnownFolder` supports iterating
+///   over all known folders.
 ///
 /// #### known-folders crate
 ///
-/// The [known-folders](https://crates.io/crates/known-folders) crate provides a
-/// `get_known_folder_path()` function that takes care of calling `SHGetKnownFolderPath` from Rust
-/// code. However, this is limited to simple uses:
+/// The [known-folders] crate provides a `get_known_folder_path()` function that takes care of
+/// calling `SHGetKnownFolderPath` from Rust code. However, this is limited to simple uses:
 ///
 /// - It does not accept custom `KNOWN_FOLDER_FLAGS` or a custom access token.
 ///
@@ -213,6 +210,10 @@ fn get_known_folder_path_or_detailed_error(id: GUID) -> Result<String, Error> {
 /// This looks up only the four folder IDs for *program files* folders. Their GUIDs are available
 /// as symbolic constants both in the `windows` crate as `GUID` objects and, as a higher level
 /// abstraction, in the `KnownFolder` enum of the `known-folders` crate.
+///
+/// [shgkfp]: https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
+/// [ikf-gp]: https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-iknownfolder-getpath
+/// [known-folders]: https://crates.io/crates/known-folders
 fn report_known_folders() -> Result<(), Error> {
     // TODO: If we can get the names without initializing COM, do so and display them as well.
     let folders = [
@@ -287,36 +288,36 @@ fn try_get_path_from_csidl(csidl: u32) -> Result<String, Error> {
 
 /// Report *program files* folder locations via lookups using CSIDLs.
 ///
-/// This calls the deprecated
-/// [`SHGetFolderPathW`](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetfolderpathw)
-/// function.
+/// This calls the deprecated [`SHGetFolderPathW`][shgfpw] function.
 ///
-/// This is the older way, before the *known folders* facilities were introduced. See
-/// [CSIDL](https://learn.microsoft.com/en-us/windows/win32/shell/csidl).
+/// This is the older way, before the *known folders* facilities were introduced. See [CSIDL].
 ///
 /// As noted there, it is recommended to use the known folders APIs instead of CSIDLs, and each
 /// CSIDL value has a corresponding `KNOWNFOLDERID` value. In contrast, not all known folders have
 /// a CSIDL, and also, unlike with CSIDLs, it is possible to register new known folders
 /// programmatically.
 ///
-/// From the [remarks section](https://learn.microsoft.com/en-us/windows/win32/shell/csidl#remarks)
-/// of that article:
+/// From the [remarks section][csidl-remarks] of that article:
 ///
 /// > These values supersede the use of environment variables for this purpose. They are in turn
-/// > superseded in Windows Vista and later by the
-/// > [KNOWNFOLDERID](https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid) values.
+/// > superseded in Windows Vista and later by the [KNOWNFOLDERID] values.
 ///
 /// (This seems to imply, by transitivity, that getting the paths of known folders is also
 /// preferable to accessing the values of environment variables, when both are applicable.)
 ///
 /// One limitation of using CSIDLs is that it cannot properly handle the unusual case that the path
-/// is a `\\?\` long path and exceeds
-/// [`MAX_PATH`](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation)
-/// characters. As
-/// [commented](https://github.com/dotnet/runtime/blob/v8.0.7/src/libraries/System.Private.CoreLib/src/System/Environment.Win32.cs#L210-L211)
-/// in the implementation of the .NET Runtime:
+/// is a `\\?\` long path and exceeds [MAX_PATH] characters. As [commented][dotnet-comment] in the
+/// implementation of the .NET Runtime:
 ///
-/// > We're using SHGetKnownFolderPath instead of SHGetFolderPath as SHGetFolderPath is capped at MAX_PATH.
+/// > We're using SHGetKnownFolderPath instead of SHGetFolderPath as SHGetFolderPath is capped at
+/// > MAX_PATH.
+///
+/// [shgfpw]: https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetfolderpathw
+/// [CSIDL]: https://learn.microsoft.com/en-us/windows/win32/shell/csidl
+/// [csidl-remarks]: https://learn.microsoft.com/en-us/windows/win32/shell/csidl#remarks
+/// [KNOWNFOLDERID]: https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid
+/// [MAX_PATH]: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+/// [dotnet-comment]: https://github.com/dotnet/runtime/blob/v8.0.7/src/libraries/System.Private.CoreLib/src/System/Environment.Win32.cs#L210-L211
 fn report_csidl() -> Result<(), Error> {
     let folders = [
         ("CSIDL_PROGRAM_FILES", CSIDL_PROGRAM_FILES), // Corresponds to: FOLDERID_ProgramFiles
@@ -341,8 +342,9 @@ fn report_csidl() -> Result<(), Error> {
 /// See `report_all_registry_views()` for more information on views.
 ///
 /// This accesses subkeys of `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion` using the `winreg`
-/// crate, which uses
-/// [`RegOpenKeyExW`](https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeyexw).
+/// crate, which uses [`RegOpenKeyExW`][regokew].
+///
+/// [regokew]: https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeyexw
 fn report_registry_view(caption: &str, flag_for_view: u32) -> Result<(), io::Error> {
     let key_names = [
         "ProgramFilesDir",
@@ -376,10 +378,12 @@ fn report_registry_view(caption: &str, flag_for_view: u32) -> Result<(), io::Err
 ///
 /// See also:
 ///
-/// - [Accessing an Alternate Registry View](https://learn.microsoft.com/en-us/windows/win32/winprog64/accessing-an-alternate-registry-view)
-///   for details on registry views that can be accessed.
+/// - [Accessing an Alternate Registry View][aarv] for details on registry views that can be
+///   accessed.
 ///
 /// - `report_registry_view()` for details on how the lookup is performed.
+///
+/// [aarv]: https://learn.microsoft.com/en-us/windows/win32/winprog64/accessing-an-alternate-registry-view
 fn report_all_registry_views() -> Result<(), io::Error> {
     let views = [
         ("default view", 0),
