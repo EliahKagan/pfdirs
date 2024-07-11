@@ -62,7 +62,7 @@
 //! - The `ProgramW6432` environment variable, `FOLDERID_ProgramFilesX64` known folder, and
 //!   `ProgramW6432Dir` registry key report the 64-bit program files directory.
 //!
-//! However, not all of them are always available to all processes on all Windows system.
+//! However, not all of them are always available to all processes on all Windows systems.
 //!
 //! As detailed in comments below on specific `report_*` functions below, Microsoft documentation
 //! tends to recommend obtaining such paths through the *known folders* facilities. However, as
