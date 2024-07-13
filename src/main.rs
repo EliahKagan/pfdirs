@@ -356,7 +356,7 @@ fn report_registry_view(caption: &str, flag_for_view: u32) -> Result<(), io::Err
     let width = column_width(key_names);
 
     let cur_ver = RegKey::predef(HKEY_LOCAL_MACHINE).open_subkey_with_flags(
-        r#"SOFTWARE\Microsoft\Windows\CurrentVersion"#,
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion",
         KEY_QUERY_VALUE | flag_for_view,
     )?;
 
