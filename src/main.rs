@@ -73,12 +73,12 @@
 //! variable or the `ProgramW6432Dir` registry key to get the path of the 64-bit program files
 //! directory:
 //!
-//! - Accessing the environment variable is easy and seems to be more common. Some forms of unusual
-//!   customization by a parent process of its child processes' environments will break this. See
-//!   `report_environment_variables()` below for details.
+//! - Accessing the `ProgramW6432` environment variable is easy and seems to be more common. Some
+//!   forms of unusual customization by a parent process of its child processes' environments will
+//!   break this. See `report_environment_variables()` below for details.
 //!
-//! - The `ProgramW6432Dir` key appears to be available on 64-bit systems through any registry
-//!   view.
+//! - The `ProgramW6432Dir` registry key appears to be available on 64-bit systems through any
+//!   registry view.
 //!
 //! On a 32-bit system, there is no way to get the 64-bit program files directory, because there is
 //! no such directory.
