@@ -148,12 +148,12 @@ where
 ///
 /// 5. On 64-bit Windows, only if the environment variable corresponding to the child process's
 ///    architecture was not passed down does the child receive `ProgramFiles` from the value the
-///    parent passed down as `ProgramFiles`. While this the normal situation on a 32-bit system, it
-///    is a fallback situation on a 64-bit system and unreliable, because if the parent and child
-///    architectures differ and the parent overly sanitizes the environment for the child, then
-///    code in the child that needs a program files directory of the same architecture as the child
-///    will malfunction, and code in the child that seeks to discover all program files directories
-///    will fail if it (solely) makes use of environment variables to do so.
+///    parent passed down as `ProgramFiles`. While this is the normal situation on a 32-bit system,
+///    it is a fallback situation on a 64-bit system and unreliable, because if the parent and
+///    child architectures differ and the parent overly sanitizes the environment for the child,
+///    then code in the child that needs a program files directory of the same architecture as the
+///    child will malfunction, and code in the child that seeks to discover all program files
+///    directories will fail if it (solely) makes use of environment variables to do so.
 ///
 /// Some of this behavior is documented in [WOW64 Implementation Details][wow64ev].
 ///
