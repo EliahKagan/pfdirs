@@ -123,7 +123,7 @@ where
 /// not all of them are passed down. It is easy for a parent process to get it wrong. Key points:
 ///
 /// 1. On a 32-bit x86 Windows system, there is exactly one program files directory, and the
-///    `ProgramFiles` environment variable should have ita path. The other environment variables
+///    `ProgramFiles` environment variable should have its path. The other environment variables
 ///    are not typically set on a 32-bit Windows system. (Currently there is no Rust target for
 ///    32-bit ARM systems, so a Rust program is very unlikely to run on one.)
 ///
