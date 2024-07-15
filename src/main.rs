@@ -1,7 +1,7 @@
 //! Reports information from multiple sources about where program files directories are located on
 //! a Windows system.
 //!
-//! Example output, from a 32-bit process running on an x86_64 Windows system:
+//! Example output, from a 32-bit process running on an x86-64 Windows system:
 //!
 //! ```text
 //! Relevant environment variables:
@@ -115,7 +115,45 @@ where
 
 /// Report *program files* folder locations contained in environment variables.
 ///
-/// FIXME: Write the rest of this documentation comment!!
+/// Environment variables are convenient, but less reliable than known folders, and probably less
+/// reliable than the other methods. Everything is fine so long as no ancestor process has removed
+/// program files related variables from its environment or created its child with a custom
+/// environment that omits them. If they are all omitted, such as if the parent process passed down
+/// an empty environment, then this will obviously fail. But the more subtle case is where some but
+/// not all of them are passed down. It is easy for a parent process to get it wrong. Key points:
+///
+/// 1. On a 32-bit x86 Windows system, there is exactly one program files directory, and the
+///    `ProgramFiles` environment variable should have ita path. The other environment variables
+///    are not typically set on a 32-bit Windows system. (Currently there is no Rust target for
+///    32-bit ARM systems, so a Rust program is very unlikely to run on one.)
+///
+/// 2. On a 64-bit Windows system, including ARM64, there are at least two program files
+///    directories. An x86-64 (AMD64) system has two, and an ARM64 (AArch64) system has three.
+///    Processes thus inherit the `ProgramFiles` environment variable, as well as two or three
+///    others that indicate program files directories associated with particular architectures.
+///
+/// 3. On 64-bit Windows, the `ProgramFiles` environment variable is inherited by the child process
+///    to hold the path of the program files directory associated with the architecture of that
+///    child process. But how can this be? After all, the parent may be a different architecture,
+///    and environment variables (or most of them, including these) are inherited from the parent.
+///
+/// 4. On 64-bit Windows, a child inherits `ProgramFiles` from its parent, but it does not usually
+///    inherit it from its parent's `Program Files` variable. Instead, and regardless of the
+///    "bitness" of the parent process, a 64-bit child process receives `ProgramFiles` from the
+///    value the parent passed down as `ProgramW6432` (whether that child is x86-64 or ARM64, since
+///    both 64-bit architectures use the same program files directory), a 32-bit x86 child process
+///    receives `ProgramFiles` from the value the parent passed down as `ProgramFiles(x86)`, and a
+///    32-bit ARM child process receives `ProgramFiles` from the value the parent passed down as
+///    `ProgramFiles(ARM)`.
+///
+/// 5. On 64-bit Windows, only if the environment variable corresponding to the child process's
+///    architecture was not passed down does the child receive `ProgramFiles` from the value the
+///    parent passed down as `ProgramFiles`. While this the normal situation on a 32-bit system, it
+///    is a fallback situation on a 64-bit system and unreliable, because if the parent and child
+///    architectures differ and the parent overly sanitizes the environment for the child, then
+///    code in the child that needs a program files directory of the same architecture as the child
+///    will malfunction, and code in the child that seeks to discover all program files directories
+///    will fail if it (solely) makes use of environment variables to do so.
 fn report_environment_variables() {
     let names = [
         "ProgramFiles",
