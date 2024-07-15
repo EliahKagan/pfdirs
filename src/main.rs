@@ -154,6 +154,10 @@ where
 ///    code in the child that needs a program files directory of the same architecture as the child
 ///    will malfunction, and code in the child that seeks to discover all program files directories
 ///    will fail if it (solely) makes use of environment variables to do so.
+///
+/// Some of this behavior is documented in [WOW64 Implementation Details][wow64ev].
+///
+/// [wow64ev]: https://learn.microsoft.com/en-us/windows/win32/winprog64/wow64-implementation-details#environment-variables
 fn report_environment_variables() {
     let names = [
         "ProgramFiles",
