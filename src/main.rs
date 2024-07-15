@@ -212,9 +212,9 @@ fn get_known_folder_path_or_detailed_error(id: GUID) -> Result<String, Error> {
 
 /// Report *program files* folder locations by querying *known folders*.
 ///
-/// This is a recommended approach. This can be done through the Windows API or indirectly through
-/// a crate that wraps it. This function showcases both and asserts that the information provided,
-/// where overlapping, is identical.
+/// See [Known Folders][kf]. This is a recommended approach. This can be done through the Windows
+/// API or indirectly through a crate that wraps it. This function showcases both and asserts that
+/// the information provided, where overlapping, is identical.
 ///
 /// #### Windows API
 ///
@@ -231,8 +231,8 @@ fn get_known_folder_path_or_detailed_error(id: GUID) -> Result<String, Error> {
 ///
 /// #### known-folders crate
 ///
-/// The [known-folders] crate provides a `get_known_folder_path()` function that takes care of
-/// calling `SHGetKnownFolderPath` from Rust code. However, this is limited to simple uses:
+/// The [kfcrate] crate provides a `get_known_folder_path()` function that takes care of calling
+/// `SHGetKnownFolderPath` from Rust code. However, this is limited to simple uses:
 ///
 /// - It does not accept custom `KNOWN_FOLDER_FLAGS` or a custom access token.
 ///
@@ -253,9 +253,10 @@ fn get_known_folder_path_or_detailed_error(id: GUID) -> Result<String, Error> {
 /// as symbolic constants both in the `windows` crate as `GUID` objects and, as a higher level
 /// abstraction, in the `KnownFolder` enum of the `known-folders` crate.
 ///
+/// [kf]: https://learn.microsoft.com/en-us/windows/win32/shell/known-folders
 /// [shgkfp]: https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
 /// [ikf-gp]: https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-iknownfolder-getpath
-/// [known-folders]: https://crates.io/crates/known-folders
+/// [kfcrate]: https://crates.io/crates/known-folders
 fn report_known_folders() -> Result<(), Error> {
     // TODO: If we can get the names without initializing COM, do so and display them as well.
     let folders = [
