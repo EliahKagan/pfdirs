@@ -1,4 +1,4 @@
-# Find "Program Files" folders in several ways
+# pfdirs - Find Program Files folders in several ways
 
 This is Rust program that reports information from multiple sources about where program files directories are located on a Windows system.
 
