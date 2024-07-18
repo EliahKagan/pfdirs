@@ -24,7 +24,7 @@ Details on the source of information, including on subtleties of availability ac
 
 - **`report_all_registry_views()`** (see also **`report_registry_view()`**) uses the `ProgramFilesDir`, `ProgramW6432Dir`, `ProgramFilesDir (x86)`, and `ProgramFilesDir (Arm)` *registry keys* in `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion`, showing their values when accessed through the default view of the registry that depends on the process architecture, as well as when [explicitly specifying](https://learn.microsoft.com/en-us/windows/win32/winprog64/accessing-an-alternate-registry-view) the 32-bit view with `KEY_WOW64_32KEY` or the 64-bit view with `KEY_WOW64_64KEY`.
 
-  It calls [`RegKey::open_subkey_with_flags`](https://docs.rs/winreg/0.52.0/winreg/reg_key/struct.RegKey.html#method.open_subkey_with_flags) in the [`winreg`](https://crates.io/crates/winreg) crate, which [itself calls](https://docs.rs/winreg/0.52.0/src/winreg/reg_key.rs.html#164-177) calls the [`RegOpenKeyExW`](https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeyexw) function.
+  It calls [`RegKey::open_subkey_with_flags`](https://docs.rs/winreg/0.52.0/winreg/reg_key/struct.RegKey.html#method.open_subkey_with_flags) in the [`winreg`](https://crates.io/crates/winreg) crate, which [itself calls](https://docs.rs/winreg/0.52.0/src/winreg/reg_key.rs.html#164-177) the [`RegOpenKeyExW`](https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeyexw) function.
 
 ## Examples
 
